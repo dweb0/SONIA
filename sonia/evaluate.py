@@ -29,6 +29,7 @@ from sonia.evaluate_model import EvaluateModel
 from sonia.utils import gene_to_num_str
 import olga.load_model as olga_load_model
 import olga.generation_probability as generation_probability
+from olga.performance.fast_pgen import FastPgen
 import numpy as np
 import time
 from tqdm import tqdm
@@ -65,7 +66,6 @@ def main():
     parser.add_option('--Q', '--selection_factor', action='store_true', dest='Q', default=False, help='compute Q')
     parser.add_option('--recompute_productive_norm', '--compute_norm', action='store_true', dest='recompute_productive_norm', default=False, help='recompute productive normalization')
     parser.add_option('--skip_off','--skip_empty_off', action='store_true', dest = 'skip_empty', default=True, help='stop skipping empty or blank sequences/lines (if for example you want to keep line index fidelity between the infile and outfile).')
-
     parser.add_option('-s','--chunk_size', type='int',metavar='N', dest='chunck_size', default = mp.cpu_count()*int(5e2), help='Number of sequences to evaluate at each iteration')
 
     #vj genes
@@ -90,6 +90,9 @@ def main():
     parser.add_option('--gene_mask_delimiter', type='choice', dest='gene_mask_delimiter',  choices=['tab', 'space', ',', ';', ':'], help="declare gene mask delimiter. Default comma unless infile delimiter is comma, then default is a semicolon. Choices: 'tab', 'space', ',', ';', ':'")
     parser.add_option('--raw_gene_mask_delimiter', type='str', dest='gene_mask_delimiter', help="declare delimiter of gene masks as a raw string.")
     parser.add_option('--comment_delimiter', type='str', dest='comment_delimiter', help="character or string to indicate comment or header lines to skip.")
+
+    parser.add_option('--fast_pgen', action='store_true', dest='fast_pgen', default=False, help='Use the numba implementation to calculate Pgen, which is much faster.')
+    parser.add_option('--single_process', action='store_true', dest='single_process', default=False, help='Use a single process to calculate Pgen (no multiprocessing)')
 
     (options, args) = parser.parse_args()
 
@@ -159,6 +162,9 @@ def main():
         generative_model = olga_load_model.GenerativeModelVJ()
         generative_model.load_and_process_igor_model(marginals_file_name)
         pgen_model = generation_probability.GenerationProbabilityVJ(generative_model, genomic_data)
+
+    if options.fast_pgen:
+        pgen_model = FastPgen(pgen_model)
 
     if options.infile_name is not None:
         infile_name = options.infile_name
@@ -409,7 +415,7 @@ def main():
                         Q=ev.evaluate_selection_factors(t)
                         for i in range(len(Q)):file.write(str(Q[i])+'\n')
                     elif options.pgen:
-                        pgens=ev.compute_all_pgens(t)/ev.sonia_model.norm_productive
+                        pgens=ev.compute_all_pgens(t, single_process=options.single_process)/ev.sonia_model.norm_productive
                         for i in range(len(pgens)):file.write(str(pgens[i])+'\n')
 
         else: #print to stdout

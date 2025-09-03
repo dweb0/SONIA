@@ -240,13 +240,15 @@ class EvaluateModel(object):
         self.data_marginals_two_independent = self.joint_marginals_independent(self.sonia_model.data_marginals)
         self.model_marginals_two_independent = self.joint_marginals_independent(self.sonia_model.model_marginals)
 
-    def compute_all_pgens(self,seqs):
+    def compute_all_pgens(self, seqs, single_process=False):
         '''Compute Pgen of sequences using OLGA in parallel
 
         Parameters
         ----------
         seqs: list
             list of sequences to evaluate.
+        single_process: bool
+            Stay in the current process (skip multiprocessing)
 
         Returns
         -------
@@ -255,19 +257,19 @@ class EvaluateModel(object):
 
         '''
 
-        final_models = [self.pgen_model for i in range(len(seqs))]    # every process needs to access this vector.
-        pool = mp.Pool(processes=self.processes)
-
-        if self.include_genes:
-            f=pool.map(compute_pgen_expand, zip(seqs,final_models))
-            pool.close()
-            return np.array(f)
+        if single_process:
+            out = []
+            for seq in seqs:
+                out.append(self.pgen_model.compute_aa_CDR3_pgen(*seq))
+            return np.array(out)
         else:
-            f=pool.map(compute_pgen_expand_novj, zip(seqs,final_models))
-            pool.close()
-            return np.array(f)
-        
-        
+            # This should avoid overhead of pickling the model for each sequence
+            chunksize = max(1, len(seqs) // (self.processes * 8))
+            with mp.Pool(processes=self.processes, initializer=_init_model, initargs=(self.pgen_model,)) as pool:
+                out = list(pool.imap(_compute_one, seqs, chunksize))
+            return np.array(out)
+
+ 
     def entropy(self,seqs=None,n=int(2e4)):
         '''Compute Entropy of Model
 
@@ -317,3 +319,15 @@ class EvaluateModel(object):
         
         self.dkl=np.mean(Q*np.log2(Q))
         return self.dkl
+
+
+_MODEL = None
+
+
+def _init_model(model):
+    global _MODEL
+    _MODEL = model
+
+
+def _compute_one(seq):
+    return _MODEL.compute_aa_CDR3_pgen(*seq)
