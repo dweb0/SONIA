@@ -245,7 +245,7 @@ def main():
         sonia_model.norm_productive=pgen_model.compute_regex_CDR3_template_pgen('CX{0,}')
 
     # load Evaluate model class
-    ev=EvaluateModel(sonia_model,custom_olga_model=pgen_model)
+    ev=EvaluateModel(sonia_model,custom_olga_model=pgen_model, single_process=options.single_process)
 
     if options.infile_name is None: #No infile specified -- args should be the input seq
         print_warnings = True
@@ -415,7 +415,7 @@ def main():
                         Q=ev.evaluate_selection_factors(t)
                         for i in range(len(Q)):file.write(str(Q[i])+'\n')
                     elif options.pgen:
-                        pgens=ev.compute_all_pgens(t, single_process=options.single_process)/ev.sonia_model.norm_productive
+                        pgens=ev.compute_all_pgens(t)/ev.sonia_model.norm_productive
                         for i in range(len(pgens)):file.write(str(pgens[i])+'\n')
 
         else: #print to stdout

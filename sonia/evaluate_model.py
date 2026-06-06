@@ -29,6 +29,9 @@ class EvaluateModel(object):
 
     custom_olga_model: object
         Optional: already loaded custom generation_probability olga model.
+    
+    single_process: bool
+        Stay in the current process (skip multiprocessing)
 
     Methods
     ----------
@@ -41,7 +44,7 @@ class EvaluateModel(object):
 
     """
 
-    def __init__(self,sonia_model=None,include_genes=True,processes=None,custom_olga_model=None):
+    def __init__(self,sonia_model=None,include_genes=True,processes=None,custom_olga_model=None, single_process=False):
 
         if type(sonia_model)==str or sonia_model is None:
             print('ERROR: you need to pass a Sonia object')
@@ -51,6 +54,8 @@ class EvaluateModel(object):
         self.include_genes=include_genes
         if processes is None: self.processes = mp.cpu_count()
         else: self.processes = processes
+
+        self.single_process = single_process
 
         # define olga model
         if custom_olga_model is not None:
@@ -240,15 +245,13 @@ class EvaluateModel(object):
         self.data_marginals_two_independent = self.joint_marginals_independent(self.sonia_model.data_marginals)
         self.model_marginals_two_independent = self.joint_marginals_independent(self.sonia_model.model_marginals)
 
-    def compute_all_pgens(self, seqs, single_process=False):
+    def compute_all_pgens(self, seqs):
         '''Compute Pgen of sequences using OLGA in parallel
 
         Parameters
         ----------
         seqs: list
             list of sequences to evaluate.
-        single_process: bool
-            Stay in the current process (skip multiprocessing)
 
         Returns
         -------
@@ -257,7 +260,7 @@ class EvaluateModel(object):
 
         '''
 
-        if single_process:
+        if self.single_process:
             out = []
             for seq in seqs:
                 out.append(self.pgen_model.compute_aa_CDR3_pgen(*seq))
