@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 name = "sonia"
 version = "0.2.2"
 #dynamic = ["version"]
-dependencies = ['numpy','tensorflow>=2.1.0','matplotlib','olga>=1.1.3','tqdm']
+dependencies = ['numpy','tensorflow>=2.1.0','matplotlib','olga>=1.1.3']
 authors = [ {name = "Zachary Sethna"}, {name = "Giulio Isacchini", email = "giulioisac@gmail.com"}]
 maintainers = [{name = "Giulio Isacchini", email = "giulioisac@gmail.com"}]
 description = 'SONIA is a python 3.6 software developed to infer selection pressures on features of amino acid CDR3 sequences. The model can be used to calculate the probability of observing any sequence after selection and sample from the selected repertoire.'

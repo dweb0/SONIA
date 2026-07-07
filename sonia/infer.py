@@ -34,7 +34,6 @@ from sonia.utils import gene_to_num_str
 import olga.load_model as olga_load_model
 import olga.generation_probability as generation_probability
 import numpy as np
-from tqdm import tqdm
 
 
 #Set input = raw_input for python 2
@@ -261,7 +260,7 @@ def main():
         print('Read input file.')
         infile = open(infile_name, 'r')
 
-        for i, line in enumerate(tqdm(infile)):
+        for i, line in enumerate(infile):
             if comment_delimiter is not None: #Default case -- no comments/header delimiter
                 if line.startswith(comment_delimiter): #allow comments
                     continue
@@ -356,7 +355,7 @@ def main():
             print('Read file of generated seqs.')
             infile = open(options.infile_gen, 'r')
 
-            for i, line in enumerate(tqdm(infile)):
+            for i, line in enumerate(infile):
                 if comment_delimiter is not None: #Default case -- no comments/header delimiter
                     if line.startswith(comment_delimiter): #allow comments
                         continue

@@ -32,7 +32,6 @@ import olga.generation_probability as generation_probability
 from olga.performance.fast_pgen import FastPgen
 import numpy as np
 import time
-from tqdm import tqdm
 import multiprocessing as mp
 
 #Set input = raw_input for python 2
@@ -407,7 +406,7 @@ def main():
                 else:
                     print('Specify one option: --ppost, --pgen or --Q')
                     return -1
-                for t in tqdm(chunks(zipped,options.chunck_size)):
+                for t in chunks(zipped,options.chunck_size):
                     if options.ppost:
                         Q,pgen,ppost=ev.evaluate_seqs(t)
                         for i in range(len(Q)):file.write(str(Q[i])+delimiter_out+str(pgen[i])+delimiter_out+str(ppost[i])+'\n')

@@ -23,7 +23,6 @@ import tensorflow as tf
 import olga.load_model as olga_load_model
 import olga.sequence_generation as seq_gen
 from copy import copy
-from tqdm import tqdm
 #Set input = raw_input for python 2
 try:
     import __builtin__
@@ -530,14 +529,14 @@ class Sonia(object):
 
         if (len(add_data_seqs + add_features + remove_features) > 0 or auto_update_seq_features) and len(self.features)>0 and len(self.data_seqs)>0:
             print('Encode data.')
-            self.data_seq_features = [self.find_seq_features(seq) for seq in tqdm(self.data_seqs)]
+            self.data_seq_features = [self.find_seq_features(seq) for seq in self.data_seqs]
 
         if (len(add_data_seqs + add_features + remove_features) > 0 or auto_update_marginals > 0) and len(self.features)>0:
             self.data_marginals = self.compute_marginals(seq_model_features = self.data_seq_features, use_flat_distribution = True)
 
         if (len(add_gen_seqs + add_features + remove_features) > 0 or auto_update_seq_features) and len(self.features)>0 and len(self.gen_seqs)>0:
             print('Encode gen.')
-            self.gen_seq_features = [self.find_seq_features(seq) for seq in tqdm(self.gen_seqs)]
+            self.gen_seq_features = [self.find_seq_features(seq) for seq in self.gen_seqs]
 
 
         if (len(add_gen_seqs + add_features + remove_features) > 0 or auto_update_marginals) and len(self.features)>0:

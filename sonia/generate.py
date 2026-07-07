@@ -32,7 +32,6 @@ from sonia.evaluate_model import EvaluateModel
 from sonia.sequence_generation import SequenceGeneration
 import olga.load_model as olga_load_model
 import numpy as np
-from tqdm import tqdm
 
 #Set input = raw_input for python 2
 try:
@@ -162,7 +161,7 @@ def main():
     if options.outfile_name is not None: #OUTFILE SPECIFIED
         with open(options.outfile_name,'w') as file:
             to_generate=chuncks(options.num_seqs_to_generate,options.chunck_size)
-            for t in tqdm(to_generate):
+            for t in to_generate:
                 if options.pgen:
                     seqs=seq_gen.generate_sequences_pre(num_seqs=t,nucleotide=True)
                 elif options.ppost:
